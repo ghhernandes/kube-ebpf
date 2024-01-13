@@ -1,9 +1,9 @@
 # kube-ebpf
 Kubernetes and eBPF learning
 
-# Kubernetes cluster setup
+# Setup
 
-disable swap temporarily (make sure swap is disabled in /etc/fstab, systemd.swap after):
+Kubernetes setup with kubeadm and cilium
 
 ## Prerequisites
 
@@ -11,6 +11,8 @@ disable swap temporarily (make sure swap is disabled in /etc/fstab, systemd.swap
 apt update
 apt install -y apt-transport-https ca-certificates curl gpg
 ```
+
+disable swap temporarily (make sure swap is disabled in /etc/fstab, systemd.swap after):
 
 https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#before-you-begin
 ```
@@ -29,7 +31,7 @@ modprobe overlay
 modprobe br_netfilter
 ```
 
-sysctl params required by setup, params persist across reboots
+sysctl params required by setup. params persist across reboots:
 
 ```
 
@@ -108,13 +110,7 @@ pull kube images:
 kubeadm config images pull
 ```
 
-create cluster:
-
-```
-kubeadm init
-```
-
-use flag `--skip-phases=addon/kube-proxy` for cilium use:
+create control plane:
 
 ```
 kubeadm init --skip-phases=addon/kube-proxy
@@ -129,8 +125,6 @@ kubeadm init --skip-phases=addon/kube-proxy
 
 ## Kubernetes
 
-[Docs](https://kubernetes.io/docs/).
-
 [Overview](https://kubernetes.io/docs/concepts/overview/)
 
 [Components](https://kubernetes.io/docs/concepts/overview/components/)
@@ -142,7 +136,6 @@ kubeadm init --skip-phases=addon/kube-proxy
 [Creating a cluster with kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/)
 
 [iptables overview](https://www.redhat.com/sysadmin/iptables)
-
 
 [Container runtimes](https://kubernetes.io/docs/setup/production-environment/container-runtimes/)
 
