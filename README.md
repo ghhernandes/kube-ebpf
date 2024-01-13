@@ -76,7 +76,7 @@ restart containerd service:
 systemctl restart containerd
 ```
 
-containerd from package manager contains runc, bot does not contain CNI plugins. to install CNI plugins:  
+containerd from package manager contains runc, but does not contain CNI plugins, to install:  
 ```
 curl -OL https://github.com/containernetworking/plugins/releases/download/v1.4.0/cni-plugins-linux-amd64-v1.4.0.tgz
 
@@ -116,10 +116,49 @@ create control plane:
 kubeadm init --skip-phases=addon/kube-proxy
 ```
 
-## create worker node
+## Create worker node
 
 - execute all prior steps
 - instead running `kubeadm init`, run `kubeadm join ...` given by control plane setup
+
+## Cilium setup
+
+install helm:
+```
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+rm get_helm.sh
+```
+
+download cilium binary:
+```
+curl -LO https://github.com/cilium/cilium/archive/main.tar.gz
+tar xzf main.tar.gz
+cd cilium-main/install/kubernetes
+```
+
+Install cilium with metrics
+
+https://docs.cilium.io/en/latest/installation/k8s-install-kubeadm/
+
+https://docs.cilium.io/en/latest/observability/grafana/
+
+```
+API_SERVER_IP=<your_api_server_ip>
+API_SERVER_PORT=<your_api_server_port> (default 6443)
+
+helm install cilium ./cilium \
+   --namespace kube-system \
+   --set kubeProxyReplacement=true \
+   --set k8sServiceHost=${API_SERVER_IP} \
+   --set k8sServicePort=${API_SERVER_PORT} \
+   --set prometheus.enabled=true \
+   --set operator.prometheus.enabled=true \
+   --set hubble.enabled=true \
+   --set hubble.metrics.enableOpenMetrics=true \
+   --set hubble.metrics.enabled="{dns,drop,tcp,flow,port-distribution,icmp,httpV2:exemplars=true;labelsContext=source_ip\,source_namespace\,source_workload\,destination_ip\,destination_namespace\,destination_workload\,traffic_direction}"
+```
 
 # References
 

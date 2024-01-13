@@ -13,8 +13,15 @@ rm get_helm.sh
 # Install cilium with metrics
 # https://docs.cilium.io/en/latest/installation/k8s-install-kubeadm/
 # https://docs.cilium.io/en/latest/observability/grafana/
+#
+# API_SERVER_IP=<your_api_server_ip>
+# API_SERVER_PORT=<your_api_server_port> (default: 6443)
+
 helm install cilium ./cilium \
    --namespace kube-system \
+   --set kubeProxyReplacement=true \
+   --set k8sServiceHost=${API_SERVER_IP} \
+   --set k8sServicePort=${API_SERVER_PORT} \
    --set prometheus.enabled=true \
    --set operator.prometheus.enabled=true \
    --set hubble.enabled=true \
