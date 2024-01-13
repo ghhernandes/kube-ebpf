@@ -1,6 +1,130 @@
 # kube-ebpf
 Kubernetes and eBPF learning
 
+# Kubernetes cluster setup
+
+disable swap temporarily (make sure swap is disabled in /etc/fstab, systemd.swap after):
+
+## Prerequisites
+
+```
+apt update
+apt install -y apt-transport-https ca-certificates curl gpg
+```
+
+https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#before-you-begin
+```
+swapoff -a
+```
+
+enable `overlay` and `br_netfilter` modules
+
+```
+cat <<EOF | tee /etc/modules-load.d/k8s.conf
+overlay
+br_netfilter
+EOF
+
+modprobe overlay
+modprobe br_netfilter
+```
+
+sysctl params required by setup, params persist across reboots
+
+```
+
+cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+EOF
+
+# Apply sysctl params without reboot
+sysctl --system
+```
+
+verify that modules are loaded
+
+```
+lsmod | grep br_netfilter
+lsmod | grep overlay
+```
+
+## containerd setup
+
+install containerd:
+```
+apt install -y containerd
+```
+
+set default containerd configs:
+```
+mkdir -p /etc/containerd/
+containerd config default > /etc/containerd/config.toml
+```
+
+use systemd cgroups:
+
+```
+sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
+```
+
+restart containerd service:
+```
+systemctl restart containerd
+```
+
+containerd from package manager contains runc, bot does not contain CNI plugins. to install CNI plugins:  
+```
+curl -OL https://github.com/containernetworking/plugins/releases/download/v1.4.0/cni-plugins-linux-amd64-v1.4.0.tgz
+
+mkdir -p /opt/cni/bin
+tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-v1.4.0.tgz
+rm -fr cni-plugins-linux-amd64-v1.4.0.tgz
+```
+
+## Install kubernetes binaries
+
+Kubernetes packages repository
+
+https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl
+
+```
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+```
+
+install `kubelet`, `kubeadm` and `kubectl`:
+```
+apt update
+apt install -y kubelet kubeadm kubectl
+apt-mark hold kubelet kubeadm kubectl
+```
+
+## Create control plane
+
+pull kube images:
+```
+kubeadm config images pull
+```
+
+create cluster:
+
+```
+kubeadm init
+```
+
+use flag `--skip-phases=addon/kube-proxy` for cilium use:
+
+```
+kubeadm init --skip-phases=addon/kube-proxy
+```
+
+## create worker node
+
+- execute all prior steps
+- instead running `kubeadm init`, run `kubeadm join ...` given by control plane setup
+
 # References
 
 ## Kubernetes
