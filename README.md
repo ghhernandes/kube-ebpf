@@ -17,9 +17,23 @@ Kubernetes and eBPF learning
 
 [Creating a cluster with kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/)
 
+[iptables overview](https://www.redhat.com/sysadmin/iptables)
+
+
 [Container runtimes](https://kubernetes.io/docs/setup/production-environment/container-runtimes/)
 
 [containerd getting started](https://github.com/containerd/containerd/blob/main/docs/getting-started.md)
+
+
+### Videos
+
+[Kubernetes networking: container](https://www.youtube.com/watch?v=B6FsWNUnRo0)
+
+[Kubernetes networking: pod network, cni and plugins](https://www.youtube.com/watch?v=U35C0EPSwoY)
+
+[Kubernetes networking: services](https://www.youtube.com/watch?v=BZk2HUKsxAQ)
+
+[kube-proxy modes: iptables and ipvs](https://www.youtube.com/watch?v=lkXLsD6-4jA)
 
 ## eBPF
 
